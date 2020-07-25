@@ -1,0 +1,217 @@
+; Programa ESCRITURA.
+	 ENP  L0
+; Comienzo del programa ESCRITURA.
+L0:
+; Dirección de la variable B.
+	 SRF 0 3
+	 STC 1
+; Asignación.
+	 ASG
+; Dirección de la variable E.
+	 SRF 0 4
+	 STC 10
+; Asignación.
+	 ASG
+; Dirección de la variable C.
+	 SRF 0 5
+	 STC 103
+; Asignación.
+	 ASG
+; Escribir.
+; Acceso a la variable B.
+	 SRF 0 3
+	 DRF
+; Comprobar si es true o false.
+	 STC 1
+	 EQ
+; Si es false salta.
+	 JMF L1
+; Escribir cadena 'Verdadero'
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 JMP L2
+L1:
+; Escribir cadena 'Falso'
+	 STC 70
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 111
+	 WRT 0
+; Fin comprobar si es true o false.
+L2:
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+	 STC 0
+; Comprobar si es true o false.
+	 STC 1
+	 EQ
+; Si es false salta.
+	 JMF L3
+; Escribir cadena 'Verdadero'
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 JMP L4
+L3:
+; Escribir cadena 'Falso'
+	 STC 70
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 111
+	 WRT 0
+; Fin comprobar si es true o false.
+L4:
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+	 STC 1
+; Acceso a la variable B.
+	 SRF 0 3
+	 DRF
+	 AND
+; Comprobar si es true o false.
+	 STC 1
+	 EQ
+; Si es false salta.
+	 JMF L5
+; Escribir cadena 'Verdadero'
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 JMP L6
+L5:
+; Escribir cadena 'Falso'
+	 STC 70
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 111
+	 WRT 0
+; Fin comprobar si es true o false.
+L6:
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+	 STC 5
+	 WRT 1
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+; Acceso a la variable E.
+	 SRF 0 4
+	 DRF
+	 WRT 1
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+	 STC 6
+	 STC 10
+	 PLUS
+	 WRT 1
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+; Acceso a la variable C.
+	 SRF 0 5
+	 DRF
+	 WRT 0
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+	 STC 121
+	 WRT 0
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+; cadena 'bien'.
+	 STC 98
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Fin del programa ESCRITURA.
+	 LVP

@@ -1,0 +1,1642 @@
+/**
+ * Procesadores de Lenguajes
+ * Álvaro García Díaz 760704
+ */
+options
+{
+  static = true;
+  ignore_case = true;
+}
+
+PARSER_BEGIN(MiniLengCompiler)
+
+import lib.Tabla_estadisticas;
+import lib.Tabla_simbolos;
+import lib.GenerarCodigo;
+import lib.RegistroExpr;
+import lib.RegistroExpr.Tipo_operador;
+import lib.Simbolo;
+import lib.Simbolo.Tipo_variable;
+import lib.Simbolo.Clase_parametro;
+import lib.exceptions.ModuloDeCeroException;
+import lib.exceptions.FicheroNoEscribibleException;
+import lib.exceptions.DesbordamientoEnterosException;
+import lib.exceptions.DivisionPorCeroException;
+import lib.exceptions.TiposDiferentesException;
+import lib.exceptions.SimboloNoEncontradoException;
+import lib.exceptions.SimboloExistenteException;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.File;
+import java.util.LinkedList;
+import java.util.Iterator;
+
+public class MiniLengCompiler
+{
+  public static final long init = 3;
+  public static boolean panic = false;
+  public static boolean asig = false;
+  public static boolean show = false;
+  public static long dir = init;
+  public static int level = 0;
+  public static Tabla_simbolos table = new Tabla_simbolos();
+  public static GenerarCodigo gen;
+
+  public static int totalSemantico = 0;
+  public static int totalSintactico = 0;
+
+  public static void error_skipto(int kind) {
+    Token t;
+    do {
+      t = getNextToken();
+    } while (t.kind != kind && t.kind != EOF);
+  }
+
+  public static void panic_mode(ParseException e, int kind) {
+    System.out.println("PANIC MODE: Falta un ; en <"
+      + SimpleCharStream.getBeginLine() + ", " + SimpleCharStream.getBeginColumn() + ">");
+  }
+
+  public static void errorLexico() {
+    System.out.println("ERROR LÉXICO (<" + SimpleCharStream.getBeginLine()
+	  + ", " + SimpleCharStream.getBeginColumn() + ">): Símbolo no reconocido: <"
+	  + SimpleCharStream.GetImage().substring(0, 1) + ">");
+  }
+
+  public static void errorSemantico(String s) {
+    ++totalSemantico;
+	System.out.println("ERROR SEMANTICO (<" + SimpleCharStream.getBeginLine()
+	  + ", " + SimpleCharStream.getBeginColumn() + ">): < " + s + " >");
+  }
+
+  public static void errorSintactico(ParseException e) {
+    ++totalSintactico;
+	System.out.println("ERROR SINTÁCTICO (<" + SimpleCharStream.getBeginLine()
+	  + ", " + SimpleCharStream.getBeginColumn() + ">): < Símbolo encontrado incorrecto: "
+	  + SimpleCharStream.GetImage() + " >");
+	error_skipto(tPCOMA);
+  }
+
+  public static void addVariable(Token id, Tipo_variable tipo) {
+	try {
+	  if(id != null) {
+	    table.introducir_variable(id.image, tipo, level, dir);
+		++dir;
+	  }
+	}
+	catch(SimboloExistenteException e) {
+	  errorSemantico("Identificador " + id.image + " duplicado");
+	}
+  }
+
+  public static void addVector(Token id, Tipo_variable tipo, Token tam) {
+    if(tam != null) {
+      int aux = Integer.parseInt(tam.image);
+	  try {
+	    if(id != null) {
+	      table.introducir_vector(id.image, tipo, aux, level, dir);
+	      gen.escribir("; Tamano del vector " + id.image + ".");
+	      gen.escribir("\t SRF 0 " + dir);
+	      gen.escribir("\t STC " + aux);
+	      gen.escribir("\t ASG");
+		  dir += aux + 1;
+	    }
+	  }
+	  catch(SimboloExistenteException e) {
+	    errorSemantico("Identificador " + id.image + " duplicado");
+	  }
+	  if(aux == 0) {
+	    errorSemantico("Vector " + id.image + " definido sin tamano");
+	  }
+	}
+  }
+
+  public static boolean checkParametro(Simbolo s, int i, RegistroExpr reg, boolean ex) {
+	LinkedList<Simbolo> list = s.getLista_parametros();
+    if(list != null) { 
+      if(list.size() <= i) {
+        if(!ex) errorSemantico("Exceso de parametros en la llamada a la accion " + s.getNombre());
+        return true;
+      }
+      Simbolo aux = list.get(i);
+      Tipo_variable tp = reg.getTipo();
+      Clase_parametro cl = reg.getClase();
+      if(aux.getVariable() != tp && tp != Tipo_variable.DESCONOCIDO && !aux.es_desconocido()) {
+        errorSemantico("Argumento de tipo " + tp + " no valido (se esperaba " + aux.getVariable() + ")");
+      }
+      if(cl == Clase_parametro.VAL && aux.es_referencia()) {
+        errorSemantico("Argumento de tipo VAL introducido en parametro de tipo REF");
+      }
+      if(ex) return true;
+    }
+    return false;
+  }
+
+  public static void posVector(Simbolo s, RegistroExpr ind) {
+    if(s != null) {
+      gen.escribir("; Dirección de la variable " + s.getNombre().toUpperCase() + "[" + ind.getValor() + "].");
+      gen.escribir("\t SRF " + (level - s.getNivel(ind.getValor())) + " " + s.getDir(ind.getValor()));
+      if(s.es_parametro() && s.es_referencia()) {
+        gen.escribir("\t DRF");
+      }
+    }
+  }
+
+  public static void checkTam(Simbolo s, RegistroExpr ind) {
+    String etMAL = gen.nueva_etiqueta(), etBIEN = gen.nueva_etiqueta();
+    gen.escribir("; Comprobar si la posicion existe.");
+    gen.escribir("\t GTE");
+    gen.escribir("; Si el nivel es mayor que la posicion, continua");
+    gen.escribir("\t JMF " + etMAL);
+
+    gen.escribir("\t STC " + ind.getValor());
+    gen.escribir("\t STC 0");
+    gen.escribir("\t LT");
+    gen.escribir("; Si la posicion es mayor que 0, es correcta");
+    gen.escribir("\t JMF " + etBIEN);
+    gen.escribir(etMAL + ":");
+    gen.escribir("; ERROR: Posicion fuera de rango");
+    etMAL = "ERROR: Posicion fuera de rango";
+    for(int i = 0; i < etMAL.length(); ++i) {
+	  gen.escribir("\t STC " + (int)etMAL.charAt(i));
+	  gen.escribir("\t WRT 0");
+	}
+
+    gen.escribir(etBIEN + ":");
+    gen.escribir("; Posicion valida del vector");
+  }
+  
+  public static void main(String args []) throws Exception
+  {
+    boolean v = false;
+    String nameFile = "";
+    if(args.length == 0) {
+      System.out.println("Sintaxis: java minilengcompiler [argumentos] <fichero_sin_extension>");
+      System.out.println("Posibles argumentos:");
+      System.out.println(" -v: Muestra una tabla con las apariciones de cada simbolo del programa");
+      System.out.println(" -t: Muestra una tabla con las apariciones de cada simbolo después de cada acción");
+      System.out.println(" -p: Panic mode (si falta un ;, no se cuenta como error)");
+	  return;
+    }
+    for(int i = 0; i < args.length; ++i) {
+      switch(args[i]) { 
+		case "-v":
+			v = true;
+			break;
+		case "-p":
+			panic = true;
+			break;
+		case "-t":
+			show = true;
+			break;
+		default:
+			if(args[i].charAt(0) == '-') {
+				for(int j = 1; j < args[i].length(); ++j) {
+					switch(args[i].charAt(j)) {
+					  case 'v':
+					  	v = true;
+					  	break;
+					  case 'p':
+					  	panic = true;
+					  	break;
+					  case 't':
+					  	show = true;
+					  	break;
+					  default:
+					}
+				}
+			} else {
+				nameFile = args[i];
+			}
+	  }
+    }
+    if(nameFile.equals("")) {
+      throw new java.io.FileNotFoundException("Fichero no introducido");
+    }
+    gen = new GenerarCodigo(nameFile);
+    Tabla_estadisticas estTabla = new Tabla_estadisticas();
+    
+    try {
+      File initialFile = new File(nameFile + ".ml");
+	  InputStream targetStream = new FileInputStream(initialFile);
+	  MiniLengCompiler parser = new MiniLengCompiler(targetStream);
+	} catch(java.io.FileNotFoundException e) {
+	  System.out.println(e);
+	  return;
+	}
+	  try { 
+	   	MiniLengCompiler.programa();
+	   	if(v) {
+	   	  System.out.println("\nEstadísticas totales\n");
+	   	  Tabla_estadisticas.estadisticas();
+	   	}
+	   	if(totalSemantico == 0 && totalSintactico == 0) {
+	   	  try {
+	   	    gen.completar();
+	   	  }
+	   	  catch(FicheroNoEscribibleException e) {
+	   	    System.out.println("No se ha podido generar el fichero .code correspondiente");
+	   	  }
+	   	} else {
+	   	  System.out.println();
+	   	  if(totalSintactico > 0) {
+	   	    System.out.println("Se han detectado un total de " + totalSintactico + " errores sintacticos");
+	   	  }
+	   	  if(totalSemantico > 0) {
+	   	    System.out.println("Se han detectado un total de " + totalSemantico + " errores semanticos");
+	   	  }
+	   	}
+	  }
+	  catch (Exception e) {
+		System.out.println("NOK.");
+	    System.out.println(e.getMessage());
+	    e.printStackTrace();
+	  }
+	  catch (Error e) { 
+	    errorLexico();
+	  }
+  }
+}
+
+PARSER_END(MiniLengCompiler)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+| < ["%"] ~["%"] > : COMMENT
+| "%%" : COMMENT_DOUBLE
+}
+
+< COMMENT > SKIP :
+{
+  "\n" : DEFAULT
+}
+
+< COMMENT_DOUBLE > SKIP :
+{
+  "%%" : DEFAULT
+}
+
+< COMMENT > MORE :
+{
+  < ~[] >
+}
+
+< COMMENT_DOUBLE > MORE :
+{
+  < ~[] >
+}
+
+TOKEN : /* PALABRAS RESERVADAS */
+{
+  < tPROGRAMA : "programa" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tPROGRAMA);
+  }
+| < tPRINCIPIO : "principio" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tPRINCIPIO);
+  }
+| < tFIN : "fin" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tFIN);
+  }
+| < tSI : "si" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tSI);
+  }
+| < tENT : "ent" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tENT);
+  }
+| < tSI_NO : "si_no" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tSI_NO);
+  }
+| < tFSI : "fsi" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tFSI);
+  }
+| < tMQ : "mq" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMQ);
+  }
+| < tFMQ : "fmq" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tFMQ);
+  }
+| < tACCION : "accion" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tACCION);
+  }
+| < tPCOMA : ";" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tPCOMA);
+  }
+| < tCOMA : "," >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCOMA);
+  }
+}
+
+TOKEN : /* OPERACIONES */
+{
+  < tENTACAR : "entacar" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tENTACAR);
+  }
+| < tCARAENT : "caraent" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCARAENT);
+  }
+| < tESCRIBIR : "escribir" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tESCRIBIR);
+  }
+| < tLEER : "leer" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tLEER);
+  }
+}
+
+TOKEN : /* TIPOS DE DATOS */
+{
+  < tENTERO : "entero" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tENTERO);
+  }
+| < tVAR : "var" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tVAR);
+  }
+| < tBOOLEANO : "booleano" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tBOOLEANO);
+  }
+| < tCARACTER : "caracter" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCARACTER);
+  }
+| < tVAL : "val" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tVAL);
+  }
+| < tREF : "ref" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tREF);
+  }
+}
+
+TOKEN : /* OPERADORES LÓGICOS*/
+{
+  <  tNI : "<>" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tNI);
+  }
+| <  tMAI : ">=" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMAI);
+  }
+| <  tMEI : "<=" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMEI);
+  }
+| <  tMAYOR : ">" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMAYOR);
+  }
+| <  tMENOR : "<" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMENOR);
+  }
+| <  tIGUAL : "=" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tIGUAL);
+  }
+| <  tNOT : "not" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tNOT);
+  }
+| <  tAND : "and" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tAND);
+  }
+| <  tOR : "or" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tOR);
+  }
+| <  tTRUE : "true" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tTRUE);
+  }
+| <  tFALSE : "false" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tFALSE);
+  }
+}
+
+TOKEN : /* OPERADORES ARITMÉTICOS*/
+{
+  <  tPAREN_DCHA : ")" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tPAREN_DCHA);
+  }
+| <  tPAREN_IZQ : "(" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tPAREN_IZQ);
+  }
+| <  tSUMA : "+" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tSUMA);
+  }
+| <  tRESTA : "-" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tRESTA);
+  }
+| <  tMUL : "*" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMUL);
+  }
+| <  tDIV : "div" | "/" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tDIV);
+  }
+| <  tMOD : "mod" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tMOD);
+  }
+| <  tOPAS : ":=" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tOPAS);
+  }
+| <  tCOR_IZQ : "[" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCOR_IZQ);
+  }
+| <  tCOR_DCHA : "]" >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCOR_DCHA);
+  }
+}
+
+TOKEN : /* VALORES */
+{
+  <  #DIGITO : ["0"-"9"] >
+| <  #LETRA : ["a"-"z"] >
+| <  #COMILLA : ["\""] >
+| <  tCONSTCHAR : < COMILLA > (~["\""]) < COMILLA > >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCONSTCHAR);
+  }
+| <  tCONSTCAD : < COMILLA > (~["\""])+ < COMILLA > >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCONSTCAD);
+  }
+| <  tIDENTIFICADOR : < LETRA > | (< LETRA > | "_") (< LETRA > | "_" | < DIGITO >)* (< LETRA > | < DIGITO >) >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tIDENTIFICADOR);
+  }
+| <  tCONSTENTERA : (< DIGITO >)+ >
+  {
+    Tabla_estadisticas.incrementar(Tabla_estadisticas.tokens.tCONSTENTERA);
+  }
+}
+
+void punto_y_coma() :
+{}
+{
+  try { 
+	< tPCOMA >
+  }
+  catch(ParseException e) {
+    if(panic) panic_mode(e, tPCOMA);
+    else errorSintactico(e);
+  }
+}
+
+Token valid_id() :
+{
+  Token t = null;
+  }
+{
+  try { 
+      t = < tIDENTIFICADOR >
+  }
+  catch(ParseException e) {
+    errorSintactico(e);
+  }
+  {
+    return t;
+  }
+}
+
+void programa() :
+{
+  Token id = null;
+  String et;
+  }
+{
+  try { 
+	< tPROGRAMA >
+	id = valid_id() {
+	  if(id.image != null) { 
+	  	table.introducir_programa(id.image, null);
+	  	gen.escribir("; Programa " + id.image.toUpperCase() + ".");
+	  }
+	  et = gen.nueva_etiqueta();
+	  gen.escribir("\t ENP  " + et);
+	}
+	punto_y_coma()
+	declaracion_variables()
+	declaracion_acciones() {
+	  if(id.image != null) {
+	    gen.escribir("; Comienzo del programa " + id.image.toUpperCase() + ".");
+	  }
+	  gen.escribir(et + ":");
+	}
+	bloque_sentencias(null)
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    if(id.image != null) { 
+	  gen.escribir("; Fin del programa " + id.image.toUpperCase() + ".");
+	}
+	gen.escribir("\t LVP");
+	
+	table.eliminar_variables(level);
+	table.eliminar_acciones(level);
+	table.eliminar_programa();
+  }
+}
+
+void declaracion_variables() :
+{}
+{
+  try { 
+	(
+	  declaracion()
+	  punto_y_coma()	)*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void declaracion() :
+{
+  Tipo_variable tipo;
+  }
+{
+  try { 
+	tipo = tipo_variables()
+	identificadores(tipo)
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+Tipo_variable tipo_variables() :
+{}
+{
+  try { 
+	  < tENTERO > { return Tipo_variable.ENTERO; }
+	| < tBOOLEANO > { return Tipo_variable.BOOLEANO; }
+	| < tCARACTER > { return Tipo_variable.CHAR; }
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return null;
+  }
+}
+
+void identificadores(Tipo_variable tipo) :
+{
+  Token id, indice = null;
+  }
+{
+  try { 
+	id = valid_id() ( < tCOR_IZQ > indice = < tCONSTENTERA > < tCOR_DCHA > )?
+	{
+	  if(indice == null) { 
+	    addVariable(id, tipo);
+	  } else {
+	    addVector(id, tipo, indice);
+	    indice = null;
+	  }
+	}
+	(
+	  < tCOMA >
+	  id = valid_id() ( < tCOR_IZQ > indice = < tCONSTENTERA > < tCOR_DCHA > )?
+	  {
+	    if(indice == null) { 
+	      addVariable(id, tipo);
+	    } else {
+	      addVector(id, tipo, indice);
+	      indice = null;
+	    }
+	  }
+	)*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void declaracion_acciones() :
+{}
+{
+  try { 
+	(
+	  declaracion_accion()	)*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void declaracion_accion() :
+{
+  Simbolo id = null;
+  String et = "";
+  long aux = dir, actual = gen.getNum();
+  dir = init;
+  }
+{
+  try { 
+	id = cabecera_accion() {
+	  if(actual != gen.getNum()) {
+	    et = "L" + gen.getNum();
+	  } else {
+	    et = gen.nueva_etiqueta();
+	  }
+	}
+	punto_y_coma()
+	declaracion_variables()
+	declaracion_acciones() {
+	  if(id != null) {
+	    gen.escribir(et + ":");
+	    gen.escribir("; Comienzo de la acción " + id.getNombre().toUpperCase() + ".");
+	  }
+	}
+	bloque_sentencias(id) {
+	  table.eliminar_variables(level);
+	  table.eliminar_acciones(level);
+	  table.ocultar_parametros(level);
+	  level--;
+	  if(id != null) {
+	    gen.escribir("; Fin de la acción / función " + id.getNombre().toUpperCase() + ".");
+	  }
+	  gen.escribir("\t CSF");
+	}
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    dir = aux;
+  }
+}
+
+Simbolo cabecera_accion() :
+{
+  Token id = null;
+  Simbolo s = null;
+  boolean ok = false;
+  LinkedList<Simbolo> list = new LinkedList<Simbolo>();
+  }
+{
+  try { 
+	< tACCION >
+	id = valid_id()
+	{
+	  if(id != null) { 
+	    try {
+	      s = table.introducir_accion(id.image, level, gen.getNum() + 1);
+	      ok = true;
+	      gen.escribir("; Acción " + id.image.toUpperCase() + ".");
+	    }
+	    catch(SimboloExistenteException e) {
+	      errorSemantico("Identificador " + id.image + " duplicado");
+	      ok = false;
+	    }
+	    level++;
+	  }
+	}
+	list = parametros_formales()
+	{
+	  if(ok) {
+	    s.setLista_parametros(list);
+	  }
+	  if(list != null && list.size() != 0) {
+	    gen.escribir(gen.nueva_etiqueta() + ":");
+	    Iterator<Simbolo> itr = list.descendingIterator();
+	    if(itr.hasNext() && s != null) {
+	      gen.escribir("; Parámetros de la acción " + s.getNombre() + ".");
+	    }
+	    while(itr.hasNext()) {
+	      s = itr.next();
+	      gen.escribir("\t SRF " + (level - s.getNivel()) + " " + s.getDir());
+	      gen.escribir("\t ASGI");
+	    }
+	    gen.escribir("\t JMP " + gen.nueva_etiqueta());
+	  }
+	}
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return s;
+  }
+}
+
+LinkedList<Simbolo> parametros_formales() :
+{
+  LinkedList<Simbolo> list = new LinkedList<Simbolo>(), aux;
+  }
+{
+  try {
+    (      < tPAREN_IZQ >
+      list = parametros()
+      (        punto_y_coma()
+        aux = parametros() {
+          list.addAll(aux);
+        }
+      )*
+	  < tPAREN_DCHA >
+    )?
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return list;
+  } 
+}
+
+LinkedList<Simbolo> lista_parametros(Clase_parametro clase, Tipo_variable tipo) :
+{
+  Token id;
+  LinkedList<Simbolo> list = new LinkedList<Simbolo>();
+  Simbolo s;
+  }
+{
+  try {
+    id = valid_id() {
+      if(id != null) {
+        try { 
+		  s = table.introducir_parametro(id.image, tipo, clase, level, dir);
+		  ++dir;
+		  list.add(s);
+        }
+        catch(SimboloExistenteException e) {
+          errorSemantico("Identificador " + id.image + " duplicado");
+        }
+      }
+    }
+	(
+	  < tCOMA >
+	  id = valid_id() {
+	    if(id != null) { 
+          try { 
+		    s = table.introducir_parametro(id.image, tipo, clase, level, dir);
+		    ++dir;
+          	list.add(s);
+          }
+          catch(SimboloExistenteException e) {
+            errorSemantico("Identificador " + id.image + " duplicado");
+          }
+          
+        }
+      }
+	    
+	)*  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return list;
+  }
+}
+
+LinkedList<Simbolo> parametros() :
+{
+  Tipo_variable tipo;
+  Clase_parametro clase;
+  LinkedList<Simbolo> list = new LinkedList<Simbolo>();
+  }
+{
+  try { 
+	clase = clase_parametros()
+	tipo = tipo_variables()
+	list = lista_parametros(clase, tipo)
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return list;
+  }
+}
+
+Clase_parametro clase_parametros() :
+{}
+{
+  try { 
+	< tVAL > { return Clase_parametro.VAL; }
+  | < tREF > { return Clase_parametro.REF; }
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return null;
+  }
+}
+
+void bloque_sentencias(Simbolo s) :
+{}
+{
+  try { 
+	< tPRINCIPIO >
+	lista_sentencias()
+	< tFIN > {
+	  if(show && s != null) {
+	   	System.out.println("\n " + s.getNombre() + ": Estadísticas\n");
+	   	Tabla_estadisticas.estadisticas();
+	  }
+	}
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void lista_sentencias() :
+{}
+{
+  try {
+	(	  sentencia()
+	)+
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void sentencia() :
+{}
+{
+  try {
+	leer() punto_y_coma()
+	| escribir() punto_y_coma()
+	| asig_acc()
+	| seleccion()
+	| mientras_que()
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void asig_acc() :
+{
+  Token t;
+  Simbolo s = null;
+  Tipo_variable tpExpr;
+  }
+{
+  try {
+	t = valid_id()
+	{
+	  try { 
+	    s = table.buscar_simbolo(t.image);
+	    tpExpr = s.getVariable();
+	  }
+	  catch(SimboloNoEncontradoException e) { 
+	    errorSemantico("Identificador " + t.image + " no encontrado");
+	    tpExpr = Tipo_variable.DESCONOCIDO;
+	    try {
+          s = table.introducir_variable(t.image, Tipo_variable.DESCONOCIDO, level, dir);
+          ++dir;
+        }
+        catch(SimboloExistenteException not) { }
+	  } 
+	}
+	(
+	  asignacion(s, tpExpr)
+	| invocacion_accion(s) {
+	  if(!s.es_accion() && !s.es_desconocido()) {
+	    errorSemantico("Invocacion a accion " + s.getNombre() + " no encontrada");
+	  }
+	}
+	)
+	punto_y_coma()
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void leer() :
+{}
+{
+  try { 
+	< tLEER >
+	< tPAREN_IZQ >
+	lista_asignables()
+	< tPAREN_DCHA >
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void lista_asignables() :
+{
+  Token id;
+  Simbolo s;
+  }
+{
+  try {
+    id = valid_id() {
+      if(id != null) {
+        try {
+          s = table.buscar_simbolo(id.image);
+          if(!s.es_leible()) {
+            errorSemantico("Variable " + id.image + " no leible");
+          } else {
+            gen.escribir("; Leer.");
+            gen.escribir("\t SRF " + (level - s.getNivel()) + " " + s.getDir());
+            if(s.es_parametro() && s.es_referencia()) {
+              gen.escribir("\t DRF");
+            }
+            if(s.es_caracter()) {
+              gen.escribir("\t RD 0");
+            } else {
+              gen.escribir("\t RD 1");
+            }
+          }
+        }
+        catch(SimboloNoEncontradoException e) {
+          errorSemantico("Identificador " + id.image + " no encontrado");
+          try {
+            s = table.introducir_variable(id.image, Tipo_variable.DESCONOCIDO, level, dir);
+            ++dir;
+          }
+          catch(SimboloExistenteException not) { }
+        }
+      }
+    }
+    (      < tCOMA >
+      id = valid_id()
+    )*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void escribir() :
+{}
+{
+  try { 
+	< tESCRIBIR >
+	< tPAREN_IZQ >
+	lista_escribibles()
+	< tPAREN_DCHA >
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void lista_escribibles() :
+{
+  gen.escribir("; Escribir.");
+  }
+{
+  try { 
+	escribibles()
+	(
+	  < tCOMA >
+	  escribibles()
+	)*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void escribibles() :
+{
+  RegistroExpr regExpr;
+  Token t;
+  }
+{
+  try { 
+	  t = < tCONSTCAD > {
+	    if(t != null) { 
+	      gen.escribir("; cadena '" + t.image.substring(1, t.image.length() - 1) + "'.");
+	      for(int i = 1; i < t.image.length() - 1; ++i) {
+	        gen.escribir("\t STC " + (int)t.image.charAt(i));
+	        gen.escribir("\t WRT 0");
+	      }
+	    }
+	  }
+	| regExpr = expresion(true) {
+	  if(regExpr.getTipo() == Tipo_variable.ENTERO) {
+	    gen.escribir("\t WRT 1");
+	  } else if(regExpr.getTipo() == Tipo_variable.CHAR) {
+	    gen.escribir("\t WRT 0");
+	  } else if(regExpr.getTipo() == Tipo_variable.BOOLEANO) {
+	    gen.escribir("; Comprobar si es true o false.");
+	    gen.escribir("\t STC 1");
+	    gen.operador(Tipo_operador.IGUAL);
+	    
+	    String et = gen.nueva_etiqueta();
+	    gen.escribir("; Si es false salta.");
+	    gen.escribir("\t JMF " + et);
+
+	    gen.escribir("; Escribir cadena 'Verdadero'");
+	    String aux = "Verdadero";
+	    for(int i = 0; i < aux.length(); ++i) {
+	      gen.escribir("\t STC " + (int)aux.charAt(i));
+	      gen.escribir("\t WRT 0");
+	    }
+
+	    String et2 = gen.nueva_etiqueta();
+	    gen.escribir("\t JMP " + et2);
+
+	    gen.escribir(et + ":");
+
+	    gen.escribir("; Escribir cadena 'Falso'");
+	    aux = "Falso";
+	    for(int i = 0; i < aux.length(); ++i) {
+	      gen.escribir("\t STC " + (int)aux.charAt(i));
+	      gen.escribir("\t WRT 0");
+	    }
+
+	    gen.escribir("; Fin comprobar si es true o false.");
+	    gen.escribir(et2 + ":");
+	  }
+	}   
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void asignacion(Simbolo s, Tipo_variable tpExpr) :
+{
+  RegistroExpr regExpr, indice = null;
+
+  if(s != null) {
+    gen.escribir("; Dirección de la variable " + s.getNombre().toUpperCase() + ".");
+    gen.escribir("\t SRF " + (level - s.getNivel()) + " " + s.getDir());
+    if(s.es_parametro() && s.es_referencia()) {
+      gen.escribir("\t DRF");
+    }
+  }
+  asig = true;
+}
+{
+  try {
+    ( < tCOR_IZQ > indice = expresion(false) < tCOR_DCHA > )?
+	< tOPAS >
+	{
+	  asig = false;
+	  if(s.es_parametro() && s.es_valor()) {
+	    errorSemantico("No se puede realizar una asignacion a un parametro por valor");
+	  }
+	  if(indice != null && indice.getTipo() != Tipo_variable.DESCONOCIDO) {
+	    if(s.getTam() == null) {
+	      errorSemantico("Variable " + s.getNombre() + " no es un vector");
+	    } else if(indice.getTipo() != Tipo_variable.ENTERO) {
+	      errorSemantico("Indice del vector " + s.getNombre() + " de tipo diferente a entero");
+	    } else if(indice.getValor() != null) {
+	      if(indice.getValor() >= s.getTam()) {
+	        errorSemantico("Desbordamiento de overflow del vector " + s.getNombre());
+	      } else if(indice.getValor() < 0) {
+	        errorSemantico("Desbordamiento de underflow del vector " + s.getNombre());
+	      } else {
+	        checkTam(s, indice);
+	        posVector(s, indice);
+	      }
+	    }
+	  }
+	}
+	regExpr = expresion(true)
+	{
+	  try {
+	    regExpr.operacionOk(tpExpr);
+	  }
+	  catch(TiposDiferentesException e) {
+	    errorSemantico("Tipos incompatibles en la asignacion (" + tpExpr + ", " + regExpr.getTipo() + ")");
+	  }
+	  gen.escribir("; Asignación.");
+	  gen.escribir("\t ASG");
+	}
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void invocacion_accion(Simbolo s) :
+{
+  if(s != null) {
+    gen.escribir("; Invocación a " + s.getNombre().toUpperCase() + ".");
+  }
+}
+{
+  try {
+	(	  argumentos(s)
+	)?
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    if(s != null) {
+      gen.escribir("\t OSF " + (dir - 1) + " " + (level - s.getNivel()) + " L" + s.getDir());
+    }
+  }
+}
+
+void mientras_que() :
+{
+  RegistroExpr regExpr;
+  String etMQ = gen.nueva_etiqueta(), etFMQ = "";
+  gen.escribir(etMQ + ":");
+  gen.escribir("; MQ.");
+  }
+{
+  try { 
+	< tMQ >
+	regExpr = expresion(true)
+	{
+	  if(regExpr != null && regExpr.getTipo() != Tipo_variable.DESCONOCIDO && regExpr.getTipo() != Tipo_variable.BOOLEANO) {
+		errorSemantico("La condicion del bucle debe ser un booleano");
+	  }
+	  etFMQ = gen.nueva_etiqueta();
+	  gen.escribir("; Salir del bucle si la guarda se evalúa a falso.");
+	  gen.escribir("\t JMF " + etFMQ);
+	}
+	lista_sentencias()
+	< tFMQ >
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    gen.escribir("; Fin de la iteración. Saltar a la cabecera del bucle.");
+    gen.escribir("\t JMP " + etMQ);
+    gen.escribir(etFMQ + ":");
+    gen.escribir("; Fin MQ.");
+  }
+}
+
+void seleccion() :
+{
+  RegistroExpr regExpr;
+  String et = gen.nueva_etiqueta();
+
+  gen.escribir("; SI.");
+  }
+{
+  try { 
+	< tSI >
+	regExpr = expresion(true)
+	{
+	  if(regExpr.getTipo() != Tipo_variable.DESCONOCIDO && regExpr.getTipo() != Tipo_variable.BOOLEANO) {
+		errorSemantico("La condicion de la seleccion debe ser un booleano");
+	  }
+	  gen.escribir("\t JMF " + et);
+	  gen.escribir("; ENT.");
+	}
+	< tENT >
+	lista_sentencias()
+	(
+	   < tSI_NO > {
+	     String fin = gen.nueva_etiqueta();
+	     gen.escribir("\t JMP " + fin);
+	     gen.escribir(et + ":");
+	     gen.escribir("; SI_NO.");
+	     et = fin;
+	   }
+	   lista_sentencias()
+	)?
+	< tFSI >
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    gen.escribir(et + ":");
+    gen.escribir("; Fin SI.");
+  }
+}
+
+void argumentos(Simbolo s) :
+{}
+{
+  try {
+	< tPAREN_IZQ >
+	(
+	  lista_expresiones(s)    
+	)?
+	< tPAREN_DCHA >
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+void lista_expresiones(Simbolo s) :
+{
+  int i = 0;
+  boolean exceso = false, drf = true;
+  RegistroExpr regExpr;
+
+  if(s.getLista_parametros() != null && i < s.getLista_parametros().size() && s.getLista_parametros().get(i).es_referencia()) {
+    drf = false;
+  }
+}
+{
+  try {
+    regExpr = expresion(drf) {
+      exceso = checkParametro(s, i, regExpr, exceso);
+      ++i;
+    }
+    (
+      < tCOMA > {
+        if(s.getLista_parametros() != null && i < s.getLista_parametros().size() && s.getLista_parametros().get(i).es_referencia()) {
+          drf = false;
+        } else {
+          drf = true;
+        }
+      }
+      regExpr = expresion(drf) {
+        exceso = checkParametro(s, i, regExpr, exceso);
+        ++i;
+      }
+    )*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    if(s.getLista_parametros() != null && i < s.getLista_parametros().size()) {
+      errorSemantico("Faltan argumentos en la llamada a la accion " + s.getNombre());
+    }
+  }
+}
+
+RegistroExpr expresion(boolean val) :
+{
+ RegistroExpr tpExpr1 = new RegistroExpr(), tpExpr2;
+ Tipo_operador t;
+  }
+{
+  try {    tpExpr1 = expresion_simple(val)
+    (
+      t = operador_relacional()
+      tpExpr2 = expresion_simple(val) {
+        try {
+          tpExpr1.operacion(tpExpr2, t);
+        }
+        catch(TiposDiferentesException e) {
+          errorSemantico("Los tipos " + tpExpr1.getTipo() + " y " + tpExpr2.getTipo() + " no concuerdan");
+        }
+        catch(DivisionPorCeroException e) {
+          errorSemantico("Detectada division entre 0");
+        }
+        catch(ModuloDeCeroException e) {
+          errorSemantico("Detectado modulo de 0");
+        }
+        catch(DesbordamientoEnterosException e) {
+	      errorSemantico("Detectado desbordamiento de enteros");
+	    }
+	    gen.operador(t);
+      }
+    )?
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return tpExpr1;
+  }
+}
+
+Tipo_operador operador_relacional() :
+{}
+{
+  try {
+    < tNI > { return Tipo_operador.NI; }
+    | < tMAI > { return Tipo_operador.MAI; }
+    | < tMEI > { return Tipo_operador.MEI; }
+    | < tMAYOR > { return Tipo_operador.MAYOR; }
+    | < tMENOR > { return Tipo_operador.MENOR; }
+    | < tIGUAL > { return Tipo_operador.IGUAL; }
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return null;
+  }
+}
+
+RegistroExpr expresion_simple(boolean val) :
+{
+  RegistroExpr regTerm1 = new RegistroExpr(), regTerm2;
+  Tipo_operador op;
+  }
+{
+  try {
+    regTerm1 = termino(val)
+    (
+      op = operador_aditivo()
+      regTerm2 = termino(val) {
+        try {
+          regTerm1.operacion(regTerm2, op);
+        }
+        catch(TiposDiferentesException e) {
+          errorSemantico("Los tipos " + regTerm1.getTipo() + " y " + regTerm2.getTipo() + " no concuerdan");
+        }
+        catch(DivisionPorCeroException e) {
+          errorSemantico("Detectada division entre 0");
+        }
+        catch(ModuloDeCeroException e) {
+          errorSemantico("Detectado modulo de 0");
+        }
+        catch(DesbordamientoEnterosException e) {
+	      errorSemantico("Detectado desbordamiento de enteros");
+	    }
+	    gen.operador(op);
+      }
+    )*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return regTerm1;
+  }
+}
+
+Tipo_operador operador_aditivo() :
+{}
+{
+  try {
+    < tSUMA > { return Tipo_operador.SUMA; }
+    | < tRESTA > { return Tipo_operador.RESTA; }
+    | < tOR > { return Tipo_operador.OR; }
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return null;
+  }
+}
+
+RegistroExpr termino(boolean val) :
+{
+  RegistroExpr regFac1 = new RegistroExpr(), regFac2;
+  Tipo_operador op;
+  }
+{
+  try {
+    regFac1 = factor(val)
+    (
+      op = operador_multiplicativo()
+      regFac2 = factor(val) {
+        try {
+          regFac1.operacion(regFac2, op);
+        }
+        catch(TiposDiferentesException e) {
+          errorSemantico("Los tipos " + regFac1.getTipo() + " y " + regFac2.getTipo() + " no concuerdan");
+        }
+        catch(DivisionPorCeroException e) {
+          errorSemantico("Detectada division entre 0");
+        }
+        catch(ModuloDeCeroException e) {
+          errorSemantico("Detectado modulo de 0");
+        }
+        catch(DesbordamientoEnterosException e) {
+	      errorSemantico("Detectado desbordamiento de enteros");
+	    }
+	    gen.operador(op);
+      }
+    )*
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return regFac1;
+  }
+}
+
+Tipo_operador operador_multiplicativo() :
+{}
+{
+  try {
+    < tDIV > { return Tipo_operador.DIV; }
+    | < tMUL > { return Tipo_operador.MUL; }
+    | < tMOD > { return Tipo_operador.MOD; }
+    | < tAND > { return Tipo_operador.AND; }
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return null;
+  }
+}
+
+RegistroExpr factor(boolean val) :
+{
+  RegistroExpr result = new RegistroExpr(), indice = null;
+  Token t = null;
+  }
+{
+  try { 
+	< tRESTA > result = factor(val)
+	{
+	  if(result.getTipo() != Tipo_variable.ENTERO && result.getTipo() != Tipo_variable.DESCONOCIDO) { 
+	    errorSemantico("Tipo incompatible. Se esperaba entero y se ha obtenido " + result.getTipo());
+	  } else if(result.getValor() != null) {
+	    result.setValor(result.getValor() * (-1));
+	  }
+	  gen.escribir("\t NGI");
+	}
+	| < tNOT > result = factor(val)
+	{
+	  if(result.getTipo() != Tipo_variable.BOOLEANO && result.getTipo() != Tipo_variable.DESCONOCIDO) { 
+	    errorSemantico("Tipo incompatible. Se esperaba booleano y se ha obtenido " + result.getTipo());
+	  } else if(result.isBool() != null) {
+	    result.setBool(!result.isBool());
+	  }
+	  gen.escribir("\t NGB");
+	}
+	| < tPAREN_IZQ > result = expresion(val) < tPAREN_DCHA >
+	| < tENTACAR > < tPAREN_IZQ > result = expresion(val) < tPAREN_DCHA >
+	{
+	  Character c = null;
+	  if(result.getTipo() != Tipo_variable.ENTERO && result.getTipo() != Tipo_variable.DESCONOCIDO) {
+	    errorSemantico("La expresion no se puede convertir en un caracter valido");
+	  } else if(result.getValor() != null) {
+	    if(result.getValor() < 0 || result.getValor() > 255) {
+	      errorSemantico("Detectado desbordamiento ASCII");
+	    } else {
+	      c = (char)result.getValor().intValue();
+	    }
+	  }
+	  result = new RegistroExpr();
+	  result.setTipo(Tipo_variable.CHAR);
+	  if(c != null) {
+	    result.setCar(c);
+	  }
+	}
+	| < tCARAENT > < tPAREN_IZQ > result = expresion(val) < tPAREN_DCHA >
+	{
+	  Integer i = null;
+	  if(result.getTipo() != Tipo_variable.CHAR && result.getTipo() != Tipo_variable.DESCONOCIDO) {
+	    errorSemantico("La expresion no se puede convertir en un entero valido");
+	  } else if(result.getCar() != null) {
+	    i = (int)result.getCar().charValue();
+	  }
+	  result = new RegistroExpr();
+	  result.setTipo(Tipo_variable.ENTERO);
+	  if(i != null) {
+	    result.setValor(i);
+	  }
+	}
+	| t = valid_id() (< tCOR_IZQ > {
+	  Simbolo s = null;
+	  try {
+	    s = table.buscar_simbolo(t.image);
+	  }
+	  catch(SimboloNoEncontradoException e) { }
+	  if(!asig && s != null) { 
+        gen.escribir("; Dirección de la variable " + s.getNombre().toUpperCase() + ".");
+        gen.escribir("\t SRF " + (level - s.getNivel()) + " " + s.getDir());
+        if(s.es_parametro() && s.es_referencia()) {
+          gen.escribir("\t DRF");
+        }
+      }
+      asig = false;
+	}
+	indice = expresion(val) < tCOR_DCHA > )?
+	{
+	  Simbolo s = null;
+	  try { 
+	    s = table.buscar_simbolo(t.image);
+	    if(indice == null) {
+	      result = new RegistroExpr(s);
+	    } else if(indice.getTipo() != Tipo_variable.ENTERO && indice.getTipo() != Tipo_variable.DESCONOCIDO) {
+	      errorSemantico("Posicion del vector " + s.getNombre() + " no es de tipo entero");
+	      result = new RegistroExpr(s);
+	    } else if(indice.getTipo() != Tipo_variable.DESCONOCIDO && indice.getValor() != null) {
+	      if(indice.getValor() >= s.getTam()) {
+	        errorSemantico("Desbordamiento de overflow del vector " + s.getNombre());
+	        result = new RegistroExpr(s);
+	      } else if(indice.getValor() < 0) {
+	        errorSemantico("Desbordamiento de underflow del vector " + s.getNombre());
+	        result = new RegistroExpr(s);
+	      } else {
+	        checkTam(s, indice);
+	        result = new RegistroExpr(s.getNum(indice.getValor()));
+	      }
+	    }
+	  }
+	  catch(SimboloNoEncontradoException e) {
+	    errorSemantico("Identificador " + t.image + " no encontrado");
+	    try {
+	      if(indice == null) { 
+	        s = table.introducir_variable(t.image, Tipo_variable.DESCONOCIDO, level, dir);
+	        ++dir;
+	        result = new RegistroExpr(s);
+	      } else if(indice.getTipo() != Tipo_variable.ENTERO) {
+	        s = table.introducir_vector(t.image, Tipo_variable.DESCONOCIDO, 0, level, dir);
+	        ++dir;
+	        result = new RegistroExpr(s);
+	      } else {
+	        s = table.introducir_vector(t.image, Tipo_variable.DESCONOCIDO, indice.getValor(), level, dir);
+	        dir += indice.getValor();
+	        result = new RegistroExpr(s.getNum(indice.getValor()));
+	      }
+	    }
+	    catch(SimboloExistenteException not) { }
+	  }
+	  
+	  if(s != null && !s.es_desconocido()) {
+	    gen.escribir("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
+	    if(indice == null) {
+	      gen.escribir("\t SRF " + (level - s.getNivel()) + " " + s.getDir());
+	    } else if(indice.getTipo() == Tipo_variable.ENTERO && indice.getValor() != null) {
+	      posVector(s, indice);
+	    }
+	    if(s.es_parametro() && s.es_referencia()) {
+	      gen.escribir("\t DRF");
+	    }
+	    if(val) {
+	      gen.escribir("\t DRF");
+	    }
+	  }
+	}
+	| t = < tCONSTENTERA >
+	{
+	  result = new RegistroExpr();
+	  try {
+	    result.setValor(Long.parseLong(t.image));
+	  }
+	  catch(DesbordamientoEnterosException e) {
+	    errorSemantico("Detectado desbordamiento de enteros");
+	  }
+	  result.setTipo(Tipo_variable.ENTERO);
+	  if(result.getValor() != null) {
+	    gen.escribir("\t STC " + result.getValor());
+	  }
+	}
+	| t = < tCONSTCHAR >
+	{
+	  result = new RegistroExpr();
+	  result.setCar(t.image.charAt(1));
+	  result.setTipo(Tipo_variable.CHAR);
+	  gen.escribir("\t STC " + (int)t.image.charAt(1));
+	}
+	| < tTRUE >
+	{
+	  result = new RegistroExpr();
+	  result.setBool(true);
+	  result.setTipo(Tipo_variable.BOOLEANO);
+	  gen.escribir("\t STC 1");
+	}
+	| < tFALSE >
+	{
+	  result = new RegistroExpr();
+	  result.setBool(false);
+	  result.setTipo(Tipo_variable.BOOLEANO);
+	  gen.escribir("\t STC 0");
+	}
+  }
+  catch(ParseException e) {
+	errorSintactico(e);
+  }
+  {
+    return result;
+  }
+}

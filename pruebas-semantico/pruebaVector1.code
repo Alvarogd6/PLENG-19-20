@@ -1,0 +1,1575 @@
+; Programa VECTOR_BIEN.
+	 ENP  L0
+; Tamano del vector a.
+	 SRF 0 4
+	 STC 5
+	 ASG
+; Tamano del vector b.
+	 SRF 0 11
+	 STC 3
+	 ASG
+; Tamano del vector c.
+	 SRF 0 17
+	 STC 8
+	 ASG
+; Acción PRUEBA.
+L1:
+; Parámetros de la acción prueba.
+	 SRF 0 4
+	 ASGI
+	 SRF 0 3
+	 ASGI
+	 JMP L2
+L2:
+; Comienzo de la acción E1.
+; Escribir.
+; Acceso a la variable E1.
+	 SRF 0 3
+	 DRF
+	 WRT 1
+	 STC 32
+	 WRT 0
+; Acceso a la variable E2.
+	 SRF 0 4
+	 DRF
+	 DRF
+	 WRT 1
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Fin de la acción / función E1.
+	 CSF
+; Comienzo del programa VECTOR_BIEN.
+L0:
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 1
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L3
+	 STC 1
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L4
+L3:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L4:
+; Posicion valida del vector
+; Dirección de la variable A[1].
+	 SRF 0 6
+	 STC 3
+; Asignación.
+	 ASG
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 0
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L5
+	 STC 0
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L6
+L5:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L6:
+; Posicion valida del vector
+; Dirección de la variable A[0].
+	 SRF 0 5
+	 STC 9
+; Asignación.
+	 ASG
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 2
+	 STC 2
+	 PLUS
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L7
+	 STC 4
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L8
+L7:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L8:
+; Posicion valida del vector
+; Dirección de la variable A[4].
+	 SRF 0 9
+	 STC 7
+; Asignación.
+	 ASG
+; Dirección de la variable C.
+	 SRF 0 17
+	 STC 2
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L9
+	 STC 2
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L10
+L9:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L10:
+; Posicion valida del vector
+; Dirección de la variable C[2].
+	 SRF 0 20
+	 STC 0
+; Asignación.
+	 ASG
+; Dirección de la variable C.
+	 SRF 0 17
+	 STC 0
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L11
+	 STC 0
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L12
+L11:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L12:
+; Posicion valida del vector
+; Dirección de la variable C[0].
+	 SRF 0 18
+	 STC 1
+; Asignación.
+	 ASG
+; Dirección de la variable B.
+	 SRF 0 11
+	 STC 1
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L13
+	 STC 1
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L14
+L13:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L14:
+; Posicion valida del vector
+; Dirección de la variable B[1].
+	 SRF 0 13
+	 STC 116
+; Asignación.
+	 ASG
+; Dirección de la variable B.
+	 SRF 0 11
+	 STC 2
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L15
+	 STC 2
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L16
+L15:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L16:
+; Posicion valida del vector
+; Dirección de la variable B[2].
+	 SRF 0 14
+	 STC 111
+; Asignación.
+	 ASG
+; Dirección de la variable A1.
+	 SRF 0 3
+	 STC 7
+; Asignación.
+	 ASG
+; Dirección de la variable A2.
+	 SRF 0 10
+	 STC 0
+; Asignación.
+	 ASG
+; Dirección de la variable B1.
+	 SRF 0 15
+	 STC 55
+; Asignación.
+	 ASG
+; Dirección de la variable C1.
+	 SRF 0 16
+	 STC 0
+; Asignación.
+	 ASG
+; Escribir.
+; cadena 'Vectores: '.
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Dirección de la variable B.
+	 SRF 0 11
+	 STC 1
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L17
+	 STC 1
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L18
+L17:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L18:
+; Posicion valida del vector
+; Acceso a la variable B.
+; Dirección de la variable B[1].
+	 SRF 0 13
+	 DRF
+	 WRT 0
+; Dirección de la variable B.
+	 SRF 0 11
+	 STC 2
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L19
+	 STC 2
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L20
+L19:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L20:
+; Posicion valida del vector
+; Acceso a la variable B.
+; Dirección de la variable B[2].
+	 SRF 0 14
+	 DRF
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 1
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L21
+	 STC 1
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L22
+L21:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L22:
+; Posicion valida del vector
+; Acceso a la variable A.
+; Dirección de la variable A[1].
+	 SRF 0 6
+	 DRF
+	 WRT 1
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 0
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L23
+	 STC 0
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L24
+L23:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L24:
+; Posicion valida del vector
+; Acceso a la variable A.
+; Dirección de la variable A[0].
+	 SRF 0 5
+	 DRF
+	 WRT 1
+	 STC 32
+	 WRT 0
+; Dirección de la variable C.
+	 SRF 0 17
+	 STC 0
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L25
+	 STC 0
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L26
+L25:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L26:
+; Posicion valida del vector
+; Acceso a la variable C.
+; Dirección de la variable C[0].
+	 SRF 0 18
+	 DRF
+; Comprobar si es true o false.
+	 STC 1
+	 EQ
+; Si es false salta.
+	 JMF L27
+; Escribir cadena 'Verdadero'
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 JMP L28
+L27:
+; Escribir cadena 'Falso'
+	 STC 70
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 111
+	 WRT 0
+; Fin comprobar si es true o false.
+L28:
+	 STC 32
+	 WRT 0
+; Dirección de la variable C.
+	 SRF 0 17
+	 STC 2
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L29
+	 STC 2
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L30
+L29:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L30:
+; Posicion valida del vector
+; Acceso a la variable C.
+; Dirección de la variable C[2].
+	 SRF 0 20
+	 DRF
+; Comprobar si es true o false.
+	 STC 1
+	 EQ
+; Si es false salta.
+	 JMF L31
+; Escribir cadena 'Verdadero'
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 JMP L32
+L31:
+; Escribir cadena 'Falso'
+	 STC 70
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 111
+	 WRT 0
+; Fin comprobar si es true o false.
+L32:
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+; cadena 'a[4]: '.
+	 STC 97
+	 WRT 0
+	 STC 91
+	 WRT 0
+	 STC 52
+	 WRT 0
+	 STC 93
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 4
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L33
+	 STC 4
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L34
+L33:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L34:
+; Posicion valida del vector
+; Acceso a la variable A.
+; Dirección de la variable A[4].
+	 SRF 0 9
+	 DRF
+	 WRT 1
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+; cadena 'Variables: '.
+	 STC 86
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 98
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Acceso a la variable B1.
+	 SRF 0 15
+	 DRF
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Acceso a la variable A1.
+	 SRF 0 3
+	 DRF
+	 WRT 1
+; Acceso a la variable A2.
+	 SRF 0 10
+	 DRF
+	 WRT 1
+	 STC 32
+	 WRT 0
+; Acceso a la variable C1.
+	 SRF 0 16
+	 DRF
+; Comprobar si es true o false.
+	 STC 1
+	 EQ
+; Si es false salta.
+	 JMF L35
+; Escribir cadena 'Verdadero'
+	 STC 86
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 JMP L36
+L35:
+; Escribir cadena 'Falso'
+	 STC 70
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 111
+	 WRT 0
+; Fin comprobar si es true o false.
+L36:
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Invocación a PRUEBA.
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 1
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L37
+	 STC 1
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L38
+L37:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L38:
+; Posicion valida del vector
+; Acceso a la variable A.
+; Dirección de la variable A[1].
+	 SRF 0 6
+	 DRF
+; Dirección de la variable A.
+	 SRF 0 4
+	 STC 0
+; Comprobar si la posicion existe.
+	 GTE
+; Si el nivel es mayor que la posicion, continua
+	 JMF L39
+	 STC 0
+	 STC 0
+	 LT
+; Si la posicion es mayor que 0, es correcta
+	 JMF L40
+L39:
+; ERROR: Posicion fuera de rango
+	 STC 69
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 79
+	 WRT 0
+	 STC 82
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 80
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 102
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 103
+	 WRT 0
+	 STC 111
+	 WRT 0
+L40:
+; Posicion valida del vector
+; Acceso a la variable A.
+; Dirección de la variable A[0].
+	 SRF 0 5
+	 OSF 25 0 L1
+; Fin del programa VECTOR_BIEN.
+	 LVP

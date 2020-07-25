@@ -1,0 +1,138 @@
+; Programa NPRIMOS.
+	 ENP  L0
+; Acción ES_PRIMO.
+L1:
+; Comienzo de la acción ES_PRIMO.
+; Dirección de la variable J.
+	 SRF 0 3
+	 STC 2
+; Asignación.
+	 ASG
+; Dirección de la variable DIVISIBLE.
+	 SRF 0 4
+	 STC 0
+; Asignación.
+	 ASG
+L2:
+; MQ.
+; Acceso a la variable J.
+	 SRF 0 3
+	 DRF
+; Acceso a la variable I.
+	 SRF 1 4
+	 DRF
+	 STC 2
+	 DIV
+	 LT
+; Acceso a la variable DIVISIBLE.
+	 SRF 0 4
+	 DRF
+	 NGB
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L3
+; Dirección de la variable DIVISIBLE.
+	 SRF 0 4
+; Acceso a la variable I.
+	 SRF 1 4
+	 DRF
+; Acceso a la variable J.
+	 SRF 0 3
+	 DRF
+	 MOD
+	 STC 0
+	 EQ
+; Asignación.
+	 ASG
+; Dirección de la variable J.
+	 SRF 0 3
+; Acceso a la variable J.
+	 SRF 0 3
+	 DRF
+	 STC 1
+	 PLUS
+; Asignación.
+	 ASG
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L2
+L3:
+; Fin MQ.
+; SI.
+; Acceso a la variable DIVISIBLE.
+	 SRF 0 4
+	 DRF
+	 NGB
+	 JMF L4
+; ENT.
+; Escribir.
+; Acceso a la variable I.
+	 SRF 1 4
+	 DRF
+	 WRT 1
+; cadena 'es primo.'.
+	 STC 101
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 112
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 109
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 46
+	 WRT 0
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+L4:
+; Fin SI.
+; Fin de la acción / función ES_PRIMO.
+	 CSF
+; Comienzo del programa NPRIMOS.
+L0:
+; Dirección de la variable N.
+	 SRF 0 3
+	 STC 100
+; Asignación.
+	 ASG
+; Dirección de la variable I.
+	 SRF 0 4
+	 STC 2
+; Asignación.
+	 ASG
+L5:
+; MQ.
+; Acceso a la variable I.
+	 SRF 0 4
+	 DRF
+; Acceso a la variable N.
+	 SRF 0 3
+	 DRF
+	 LTE
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L6
+; Invocación a ES_PRIMO.
+	 OSF 4 0 L1
+; Dirección de la variable I.
+	 SRF 0 4
+; Acceso a la variable I.
+	 SRF 0 4
+	 DRF
+	 STC 1
+	 PLUS
+; Asignación.
+	 ASG
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L5
+L6:
+; Fin MQ.
+; Fin del programa NPRIMOS.
+	 LVP

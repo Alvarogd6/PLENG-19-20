@@ -1,0 +1,514 @@
+; Programa ADIVINAR.
+	 ENP  L0
+; Acción SIONO.
+L1:
+; Comienzo de la acción SIONO.
+; Dirección de la variable C.
+	 SRF 0 3
+	 STC 32
+; Asignación.
+	 ASG
+L2:
+; MQ.
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 83
+	 NEQ
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 78
+	 NEQ
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L3
+; Escribir.
+; cadena '(S/N)?'.
+	 STC 40
+	 WRT 0
+	 STC 83
+	 WRT 0
+	 STC 47
+	 WRT 0
+	 STC 78
+	 WRT 0
+	 STC 41
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Leer.
+	 SRF 0 3
+	 RD 0
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L2
+L3:
+; Fin MQ.
+; Dirección de la variable RESPUESTA.
+	 SRF 1 3
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+; Asignación.
+	 ASG
+; Fin de la acción / función SIONO.
+	 CSF
+; Acción PEDIRLETRA.
+L4:
+; Comienzo de la acción PEDIRLETRA.
+; Dirección de la variable C.
+	 SRF 0 3
+	 STC 32
+; Asignación.
+	 ASG
+L5:
+; MQ.
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 65
+	 LT
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 90
+	 GT
+	 OR
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L6
+; Escribir.
+; cadena 'letra:'.
+	 STC 108
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 58
+	 WRT 0
+; Leer.
+	 SRF 0 3
+	 RD 0
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L5
+L6:
+; Fin MQ.
+; Dirección de la variable RESPUESTA.
+	 SRF 1 3
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+; Asignación.
+	 ASG
+; Fin de la acción / función PEDIRLETRA.
+	 CSF
+; Comienzo del programa ADIVINAR.
+L0:
+; Escribir.
+; cadena 'Piensa en una letra e intentare adivinarla.'.
+	 STC 80
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 118
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 46
+	 WRT 0
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Escribir.
+; cadena 'Listo?'.
+	 STC 76
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Invocación a SIONO.
+	 OSF 9 0 L1
+; Dirección de la variable MIN.
+	 SRF 0 5
+	 STC 65
+; Asignación.
+	 ASG
+; Dirección de la variable MAX.
+	 SRF 0 6
+	 STC 90
+; Asignación.
+	 ASG
+; Dirección de la variable HEADIVINADO.
+	 SRF 0 7
+	 STC 0
+; Asignación.
+	 ASG
+L7:
+; MQ.
+; Acceso a la variable MIN.
+	 SRF 0 5
+	 DRF
+; Acceso a la variable MAX.
+	 SRF 0 6
+	 DRF
+	 NEQ
+; Acceso a la variable HEADIVINADO.
+	 SRF 0 7
+	 DRF
+	 NGB
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L8
+; Dirección de la variable LETRA.
+	 SRF 0 4
+; Acceso a la variable MIN.
+	 SRF 0 5
+	 DRF
+; Acceso a la variable MAX.
+	 SRF 0 6
+	 DRF
+	 PLUS
+	 STC 2
+	 DIV
+; Asignación.
+	 ASG
+; Escribir.
+	 STC 40
+	 WRT 0
+; Acceso a la variable MIN.
+	 SRF 0 5
+	 DRF
+	 WRT 0
+	 STC 44
+	 WRT 0
+; Acceso a la variable MAX.
+	 SRF 0 6
+	 DRF
+	 WRT 0
+	 STC 41
+	 WRT 0
+; cadena ': has pensado en la letra '.
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 104
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 112
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Acceso a la variable LETRA.
+	 SRF 0 4
+	 DRF
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Invocación a SIONO.
+	 OSF 9 0 L1
+; SI.
+; Acceso a la variable RESPUESTA.
+	 SRF 0 3
+	 DRF
+	 STC 78
+	 EQ
+	 JMF L9
+; ENT.
+; Escribir.
+; cadena 'La letra que has pensado es mayor?'.
+	 STC 76
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 113
+	 WRT 0
+	 STC 117
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 104
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 112
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 100
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 109
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 121
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Invocación a SIONO.
+	 OSF 9 0 L1
+; SI.
+; Acceso a la variable RESPUESTA.
+	 SRF 0 3
+	 DRF
+	 STC 83
+	 EQ
+	 JMF L10
+; ENT.
+; Dirección de la variable MIN.
+	 SRF 0 5
+; Acceso a la variable LETRA.
+	 SRF 0 4
+	 DRF
+	 STC 1
+	 PLUS
+; Asignación.
+	 ASG
+	 JMP L11
+L10:
+; SI_NO.
+; Dirección de la variable MAX.
+	 SRF 0 6
+; Acceso a la variable LETRA.
+	 SRF 0 4
+	 DRF
+	 STC 1
+	 SBT
+; Asignación.
+	 ASG
+L11:
+; Fin SI.
+	 JMP L12
+L9:
+; SI_NO.
+; Dirección de la variable HEADIVINADO.
+	 SRF 0 7
+	 STC 1
+; Asignación.
+	 ASG
+L12:
+; Fin SI.
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L7
+L8:
+; Fin MQ.
+; SI.
+; Acceso a la variable HEADIVINADO.
+	 SRF 0 7
+	 DRF
+	 NGB
+	 JMF L13
+; ENT.
+; Escribir.
+; cadena 'La letra es la '.
+	 STC 76
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 108
+	 WRT 0
+	 STC 97
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Acceso a la variable MIN.
+	 SRF 0 5
+	 DRF
+	 WRT 0
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+L13:
+; Fin SI.
+; Fin del programa ADIVINAR.
+	 LVP

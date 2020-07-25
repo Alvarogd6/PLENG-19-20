@@ -1,0 +1,212 @@
+; Programa NOVENTA_Y_NUEVE.
+	 ENP  L0
+; Comienzo del programa NOVENTA_Y_NUEVE.
+L0:
+; Dirección de la variable N.
+	 SRF 0 5
+	 STC 0
+; Asignación.
+	 ASG
+L1:
+; MQ.
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 0
+	 LTE
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 100
+	 GTE
+	 OR
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 10
+	 DIV
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 10
+	 MOD
+	 EQ
+	 OR
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L2
+; Escribir.
+; cadena 'n: '.
+	 STC 110
+	 WRT 0
+	 STC 58
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Leer.
+	 SRF 0 5
+	 RD 1
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L1
+L2:
+; Fin MQ.
+; Escribir.
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 WRT 1
+; cadena ' se convierte en '.
+	 STC 32
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 118
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 116
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+; Dirección de la variable X.
+	 SRF 0 3
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 10
+	 DIV
+; Asignación.
+	 ASG
+; Dirección de la variable Y.
+	 SRF 0 4
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 10
+	 MOD
+; Asignación.
+	 ASG
+; Dirección de la variable M.
+	 SRF 0 6
+	 STC 10
+; Acceso a la variable Y.
+	 SRF 0 4
+	 DRF
+	 TMS
+; Acceso a la variable X.
+	 SRF 0 3
+	 DRF
+	 PLUS
+; Asignación.
+	 ASG
+; SI.
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+; Acceso a la variable M.
+	 SRF 0 6
+	 DRF
+	 GT
+	 JMF L3
+; ENT.
+; Dirección de la variable N.
+	 SRF 0 5
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+; Acceso a la variable M.
+	 SRF 0 6
+	 DRF
+	 SBT
+; Asignación.
+	 ASG
+	 JMP L4
+L3:
+; SI_NO.
+; Dirección de la variable N.
+	 SRF 0 5
+; Acceso a la variable M.
+	 SRF 0 6
+	 DRF
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 SBT
+; Asignación.
+	 ASG
+L4:
+; Fin SI.
+; Dirección de la variable X.
+	 SRF 0 3
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 10
+	 DIV
+; Asignación.
+	 ASG
+; Dirección de la variable Y.
+	 SRF 0 4
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 STC 10
+	 MOD
+; Asignación.
+	 ASG
+; Dirección de la variable M.
+	 SRF 0 6
+	 STC 10
+; Acceso a la variable Y.
+	 SRF 0 4
+	 DRF
+	 TMS
+; Acceso a la variable X.
+	 SRF 0 3
+	 DRF
+	 PLUS
+; Asignación.
+	 ASG
+; Dirección de la variable N.
+	 SRF 0 5
+; Acceso a la variable M.
+	 SRF 0 6
+	 DRF
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 PLUS
+; Asignación.
+	 ASG
+; Escribir.
+; Acceso a la variable N.
+	 SRF 0 5
+	 DRF
+	 WRT 1
+	 STC 13
+	 WRT 0
+	 STC 10
+	 WRT 0
+; Fin del programa NOVENTA_Y_NUEVE.
+	 LVP

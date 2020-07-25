@@ -1,0 +1,214 @@
+; Programa CONDICIONES.
+	 ENP  L0
+; Acción WHILE.
+L1:
+; Comienzo de la acción WHILE.
+; Dirección de la variable C.
+	 SRF 0 3
+	 STC 32
+; Asignación.
+	 ASG
+L2:
+; MQ.
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 83
+	 NEQ
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 78
+	 GTE
+	 AND
+	 STC 1
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L3
+; Escribir.
+; cadena '(S/N)?'.
+	 STC 40
+	 WRT 0
+	 STC 83
+	 WRT 0
+	 STC 47
+	 WRT 0
+	 STC 78
+	 WRT 0
+	 STC 41
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Leer.
+	 SRF 0 3
+	 RD 0
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L2
+L3:
+; Fin MQ.
+L4:
+; MQ.
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 83
+	 LTE
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 78
+	 GT
+	 AND
+	 STC 0
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L5
+; Escribir.
+; cadena '(S/N)?'.
+	 STC 40
+	 WRT 0
+	 STC 83
+	 WRT 0
+	 STC 47
+	 WRT 0
+	 STC 78
+	 WRT 0
+	 STC 41
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Leer.
+	 SRF 0 3
+	 RD 0
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L4
+L5:
+; Fin MQ.
+L6:
+; MQ.
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 83
+	 LT
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 STC 78
+	 EQ
+	 AND
+	 STC 4
+	 STC 4
+	 EQ
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L7
+; Escribir.
+; cadena '(S/N)?'.
+	 STC 40
+	 WRT 0
+	 STC 83
+	 WRT 0
+	 STC 47
+	 WRT 0
+	 STC 78
+	 WRT 0
+	 STC 41
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Leer.
+	 SRF 0 3
+	 RD 0
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L6
+L7:
+; Fin MQ.
+L8:
+; MQ.
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+; Acceso a la variable C.
+	 SRF 0 3
+	 DRF
+	 EQ
+	 STC 101
+	 STC 101
+	 EQ
+	 AND
+	 STC 1
+	 STC 1
+	 EQ
+	 AND
+; Salir del bucle si la guarda se evalúa a falso.
+	 JMF L9
+; Escribir.
+; cadena '(S/N)?'.
+	 STC 40
+	 WRT 0
+	 STC 83
+	 WRT 0
+	 STC 47
+	 WRT 0
+	 STC 78
+	 WRT 0
+	 STC 41
+	 WRT 0
+	 STC 63
+	 WRT 0
+; Leer.
+	 SRF 0 3
+	 RD 0
+; Fin de la iteración. Saltar a la cabecera del bucle.
+	 JMP L8
+L9:
+; Fin MQ.
+; Fin de la acción / función WHILE.
+	 CSF
+; Comienzo del programa CONDICIONES.
+L0:
+; Invocación a WHILE.
+	 OSF 2 0 L1
+; Escribir.
+; cadena 'fichero sin errores'.
+	 STC 102
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 99
+	 WRT 0
+	 STC 104
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 115
+	 WRT 0
+	 STC 105
+	 WRT 0
+	 STC 110
+	 WRT 0
+	 STC 32
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 111
+	 WRT 0
+	 STC 114
+	 WRT 0
+	 STC 101
+	 WRT 0
+	 STC 115
+	 WRT 0
+; Fin del programa CONDICIONES.
+	 LVP
